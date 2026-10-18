@@ -1,0 +1,477 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RETO DEL COMPOST</title>
+
+<style>
+:root {
+  --forest: #244d35;
+  --leaf: #39734b;
+  --cream: #fff9e9;
+  --ink: #203629;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: linear-gradient(135deg, #e9f3d7, #cfe4c2);
+  font-family: Arial, Helvetica, sans-serif;
+  color: var(--ink);
+}
+
+.card {
+  width: min(720px, 100%);
+  background: var(--cream);
+  border: 3px solid var(--forest);
+  border-radius: 22px;
+  overflow: hidden;
+  box-shadow: 0 15px 40px #244d3520;
+}
+
+header {
+  background: var(--forest);
+  color: white;
+  text-align: center;
+  padding: 24px 16px;
+}
+
+header .emoji {
+  font-size: 36px;
+}
+
+h1 {
+  font-size: clamp(1.7rem, 5vw, 2.5rem);
+  margin: 7px 0;
+  font-weight: 900;
+}
+
+header p {
+  margin: 6px 0 0;
+  color: #e2efce;
+}
+
+main {
+  padding: clamp(20px, 5vw, 40px);
+}
+
+.screen {
+  display: none;
+}
+
+.screen.active {
+  display: block;
+}
+
+.kicker {
+  color: var(--leaf);
+  font-size: 0.8rem;
+  font-weight: bold;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin: 0 0 10px;
+}
+
+h2 {
+  color: var(--forest);
+  font-size: clamp(1.4rem, 4vw, 2rem);
+  line-height: 1.2;
+  margin: 0 0 12px;
+}
+
+p {
+  line-height: 1.6;
+}
+
+.help {
+  color: #526454;
+  margin: 0 0 22px;
+}
+
+label {
+  display: block;
+  font-weight: bold;
+  margin-bottom: 9px;
+}
+
+input {
+  display: block;
+  width: 100%;
+  padding: 15px;
+  border: 2px solid #bdcdb2;
+  border-radius: 12px;
+  font: inherit;
+  font-size: 1rem;
+  background: white;
+}
+
+input:focus {
+  outline: 3px solid #cce5b6;
+  border-color: var(--leaf);
+}
+
+button,
+.next-link {
+  border: 0;
+  border-radius: 12px;
+  background: var(--forest);
+  color: white;
+  padding: 14px 20px;
+  font: inherit;
+  font-weight: bold;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 16px;
+}
+
+button:hover,
+.next-link:hover {
+  background: #326344;
+}
+
+.error {
+  color: #a43d2f;
+  font-weight: bold;
+  min-height: 1.3em;
+  margin-top: 8px;
+}
+
+.roster {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin: 18px 0;
+}
+
+.person {
+  background: #edf2e3;
+  border: 1px solid #d5dfc9;
+  border-radius: 12px;
+  padding: 12px;
+  overflow-wrap: anywhere;
+}
+
+.person small {
+  display: block;
+  color: #60735e;
+  font-weight: bold;
+  margin-bottom: 4px;
+}
+
+footer {
+  text-align: center;
+  padding: 14px;
+  color: #71806a;
+  font-size: 0.8rem;
+  border-top: 1px solid #e3e8d9;
+}
+
+.progress {
+  height: 8px;
+  background: #e2e9d7;
+  border-radius: 20px;
+  overflow: hidden;
+  margin-bottom: 25px;
+}
+
+.bar {
+  height: 100%;
+  width: 0;
+  background: #8fbd5b;
+  transition: width 0.3s ease;
+}
+
+@media (max-width: 480px) {
+  .roster {
+    grid-template-columns: 1fr;
+  }
+
+  button,
+  .next-link {
+    width: 100%;
+  }
+}
+</style>
+</head>
+
+<body>
+<div class="card">
+
+  <header>
+    <div class="emoji" aria-hidden="true">🌱</div>
+    <h1>RETO DEL COMPOST</h1>
+    <p>Cuatro científicos. Un equipo. ¡Una misión sostenible!</p>
+  </header>
+
+  <main>
+    <div class="progress">
+      <div class="bar" id="bar"></div>
+    </div>
+
+    <!-- PANTALLA DE BIENVENIDA -->
+    <section class="screen active" id="welcome">
+      <p class="kicker">Fase 1 · Presentación</p>
+      <h2>¡Forma tu equipo de investigación!</h2>
+      <p class="help">
+        Cada participante escribirá su nombre por turnos.
+        Al final, inventaréis un nombre científico para vuestro grupo.
+      </p>
+      <button type="button" onclick="startGame()">
+        Empezar el reto →
+      </button>
+    </section>
+
+    <!-- PANTALLA DE PARTICIPANTES -->
+    <section class="screen" id="playerScreen">
+      <p class="kicker" id="playerKicker">
+        Presentación individual · 1 de 4
+      </p>
+
+      <h2 id="playerHeading">
+        Escribe el nombre del CIENTÍFICO 1
+      </h2>
+
+      <p class="help" id="playerHelp">
+        Escribe tu nombre.
+      </p>
+
+      <label id="playerLabel" for="playerName">
+        Nombre del CIENTÍFICO 1
+      </label>
+
+      <input
+        id="playerName"
+        type="text"
+        maxlength="50"
+        autocomplete="off"
+        placeholder="Escribe tu nombre…"
+      >
+
+      <div class="error" id="playerError" role="alert"></div>
+
+      <button type="button" onclick="savePlayer()">
+        Guardar y continuar →
+      </button>
+    </section>
+
+    <!-- PANTALLA DEL NOMBRE DEL GRUPO -->
+    <section class="screen" id="groupScreen">
+      <p class="kicker">Último paso · Nombre del equipo</p>
+
+      <h2>ESCRIBE UN NOMBRE CIENTÍFICO PARA TU GRUPO</h2>
+
+      <p class="help">
+        Inventad un nombre original. ¡Cualquier nombre vale!
+      </p>
+
+      <div class="roster" id="roster"></div>
+
+      <label for="groupName">
+        Nombre científico del grupo
+      </label>
+
+      <input
+        id="groupName"
+        type="text"
+        maxlength="70"
+        autocomplete="off"
+        placeholder="Ej.: Los Microbios Galácticos…"
+      >
+
+      <div class="error" id="groupError" role="alert"></div>
+
+      <button type="button" onclick="finishGame()">
+        Finalizar el reto ✓
+      </button>
+    </section>
+
+    <!-- PANTALLA FINAL SIN BOTÓN VOLVER A JUGAR -->
+    <section class="screen" id="finishScreen">
+      <div style="font-size:48px" aria-hidden="true">🌿🏆</div>
+
+      <p class="kicker">¡Misión cumplida!</p>
+
+      <h2>¡Reto del Compost completado!</h2>
+
+      <p class="help">
+        El equipo científico ya está listo para empezar su aventura.
+      </p>
+
+      <div class="roster" id="finalRoster"></div>
+
+      <div class="person">
+        <small>NOMBRE CIENTÍFICO DEL GRUPO</small>
+        <strong id="finalGroup"></strong>
+      </div>
+
+      <div id="nextArea"></div>
+      <p class="help" id="nextHelp"></p>
+    </section>
+
+  </main>
+
+  <footer>
+    Un pequeño equipo puede hacer grandes cosas por el planeta 🌍
+  </footer>
+
+</div>
+
+<script>
+// ENLACE AL SIGUIENTE GENIALLY.
+// Puedes cambiarlo cuando tengas el enlace del siguiente juego.
+var NEXT_PAGE_URL =
+  "https://view.genially.com/6ad3f645bb9c11c602c537d1";
+
+var playerNames = ["", "", "", ""];
+var playerNumber = 1;
+
+function showScreen(id, progress) {
+  var screens = document.querySelectorAll(".screen");
+
+  for (var i = 0; i < screens.length; i++) {
+    screens[i].classList.remove("active");
+  }
+
+  document.getElementById(id).classList.add("active");
+  document.getElementById("bar").style.width = progress + "%";
+}
+
+function startGame() {
+  playerNumber = 1;
+
+  document.getElementById("playerName").value = "";
+  document.getElementById("playerError").textContent = "";
+
+  updatePlayerScreen();
+  showScreen("playerScreen", 20);
+
+  document.getElementById("playerName").focus();
+}
+
+function updatePlayerScreen() {
+  var title =
+    "Escribe el nombre del CIENTÍFICO " + playerNumber;
+
+  document.getElementById("playerKicker").textContent =
+    "Presentación individual · " + playerNumber + " de 4";
+
+  document.getElementById("playerHeading").textContent = title;
+
+  document.getElementById("playerLabel").textContent =
+    "Nombre del CIENTÍFICO " + playerNumber;
+
+  document.getElementById("playerHelp").textContent =
+    playerNumber === 1
+      ? "Turno de la primera persona."
+      : "Pasa el dispositivo al científico " + playerNumber + ".";
+}
+
+function savePlayer() {
+  var field = document.getElementById("playerName");
+  var value = field.value.trim();
+  var error = document.getElementById("playerError");
+
+  if (value.length === 0) {
+    error.textContent = "Escribe un nombre para continuar.";
+    field.focus();
+    return;
+  }
+
+  playerNames[playerNumber - 1] = value;
+  error.textContent = "";
+
+  if (playerNumber < 4) {
+    playerNumber++;
+    field.value = "";
+
+    updatePlayerScreen();
+    showScreen("playerScreen", playerNumber * 20);
+
+    field.focus();
+  } else {
+    renderRoster("roster");
+
+    document.getElementById("groupName").value = "";
+    document.getElementById("groupError").textContent = "";
+
+    showScreen("groupScreen", 85);
+    document.getElementById("groupName").focus();
+  }
+}
+
+function renderRoster(targetId) {
+  var target = document.getElementById(targetId);
+  target.replaceChildren();
+
+  for (var i = 0; i < playerNames.length; i++) {
+    var box = document.createElement("div");
+    box.className = "person";
+
+    var small = document.createElement("small");
+    small.textContent = "CIENTÍFICO " + (i + 1);
+
+    var strong = document.createElement("strong");
+    strong.textContent = playerNames[i];
+
+    box.appendChild(small);
+    box.appendChild(strong);
+    target.appendChild(box);
+  }
+}
+
+function finishGame() {
+  var field = document.getElementById("groupName");
+  var group = field.value.trim();
+
+  if (!group) {
+    document.getElementById("groupError").textContent =
+      "Inventad un nombre para vuestro grupo.";
+
+    field.focus();
+    return;
+  }
+
+  document.getElementById("groupError").textContent = "";
+  document.getElementById("finalGroup").textContent = group;
+
+  renderRoster("finalRoster");
+
+  var area = document.getElementById("nextArea");
+  area.replaceChildren();
+
+  if (NEXT_PAGE_URL.trim() !== "") {
+    var link = document.createElement("a");
+
+    link.className = "next-link";
+    link.href = NEXT_PAGE_URL.trim();
+    link.target = "_blank";
+    link.rel = "noopener";
+    link.textContent = "Ir a la siguiente página →";
+
+    area.appendChild(link);
+
+    document.getElementById("nextHelp").textContent =
+      "¡Ya podéis continuar con la aventura!";
+  } else {
+    document.getElementById("nextHelp").textContent =
+      "El reto está completo.";
+  }
+
+  showScreen("finishScreen", 100);
+}
+</script>
+
+</body>
+</html>
